@@ -8,6 +8,7 @@ Some easy nlp aug func...
 - random swag word
 - random retranslation
 - random synonym substitution # need scientific internet
+- random back translate(free, support by youdao)
 
 
 ## examples

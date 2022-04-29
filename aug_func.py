@@ -1,5 +1,6 @@
-import random
 import jieba
+from typing import Dict, List, Callable, Any
+import random
 
 same_dict = {}
 with open("data/synonym.txt", "r") as r:
@@ -93,11 +94,51 @@ def random_googletrans(sentence, prob):
         return s.text
 
 
+# 有道随机回译
+def back_translate(text: str,
+                   prob: float,
+                   keywords: List[str] = None,
+                   handle_func: Callable[[Dict[str, str]], Any] = lambda x: x) -> Any:
+    if random.random() > prob:
+        return text
+    else:
+        schemas = {
+            "youdao": [
+                ["zh-CN", "en", "zh-CN"]
+            ]
+        }
+        res = {"origin": text}
+        for platform, schema_list in schemas.items():
+            trans_func = __import__(f"{platform}.main", fromlist=platform).back_translate
+            for schema in schema_list:
+                try:
+                    schema_key = "->".join(schema)
+                    res[f"{platform}    {schema_key}"] = trans_func(text, lang_list=schema)
+                except Exception:
+                    pass
+
+                if keywords:  # 使用keyword mask
+                    keywords = list(set(keywords))  # 过滤重复keywords
+                    hit_keywords = [keyword for keyword in keywords if keyword in text]
+                    for selected_keyword in hit_keywords:
+                        try:
+                            replaced_text = text.replace(selected_keyword, "UNK")
+                            back_translate_res = trans_func(replaced_text, lang_list=schema)
+                            if "UNK" in back_translate_res or "unk" in back_translate_res:
+                                back_translate_res = back_translate_res.replace("UNK", selected_keyword)
+                                back_translate_res = back_translate_res.replace("unk", selected_keyword)
+                                res[f"{platform}    {schema_key}    kw_mask{selected_keyword}"] = back_translate_res
+                        except Exception:
+                            pass
+
+        return res['youdao    zh-CN->en->zh-CN']
+
 func_list = [
     random_delete_word, 
     random_delete_char, 
     random_swap_word, 
     random_delete_symbol, 
     random_change_same_word,
+    back_translate,
     # random_googletrans  # 要翻墙才能用...
 ]
