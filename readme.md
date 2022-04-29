@@ -6,9 +6,9 @@ Some easy nlp aug func...
 - random delete char
 - random delete symbol
 - random swag word
-- random retranslation
-- random synonym substitution # need scientific internet
-- random back translate(free, support by youdao)
+- random retranslation (need scientific internet, support by google)
+- random synonym substitution 
+- random back translate (free, support by youdao)
 
 
 ## examples
